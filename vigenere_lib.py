@@ -56,6 +56,38 @@ def mostrar_proceso(texto, clave):
 
     return "\n".join(lineas)
 
+def mostrar_proceso_detallado(texto, clave):
+    """Muestra el proceso paso a paso con valores numéricos"""
+    texto = limpiar_texto(texto)
+    clave_ext = generar_clave(texto, clave)
+    cifrado = cifrar_vigenere(texto, clave)
+
+    lineas = []
+    lineas.append("=" * 70)
+    lineas.append("PROCESO DETALLADO DE CIFRADO VIGENÈRE")
+    lineas.append("=" * 70)
+
+    for i in range(len(texto)):
+        m_letra = texto[i]
+        k_letra = clave_ext[i]
+        c_letra = cifrado[i]
+
+        m_val = ord(m_letra) - 65
+        k_val = ord(k_letra) - 65
+        c_val = ord(c_letra) - 65
+
+        lineas.append(f"\nPosición {i}:")
+        lineas.append(f"  {m_letra} + {k_letra} →")
+        lineas.append(f"  {m_val} + {k_val} = {m_val + k_val}")
+        lineas.append(f"  ({m_val + k_val}) mod 26 = {c_val}")
+        lineas.append(f"  {c_val} → {c_letra} ✓")
+
+    lineas.append("\n" + "=" * 70)
+    lineas.append(f"Resultado: {cifrado}")
+    lineas.append("=" * 70)
+
+    return "\n".join(lineas)
+
 def analisis_polialfabetico(texto, clave):
     texto = limpiar_texto(texto)
     clave_ext = generar_clave(texto, clave)

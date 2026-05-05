@@ -5,6 +5,7 @@ import criptoanalisis_lib
 import comparador_lib
 import vigenere_lib
 import kasiski_lib
+import vigenere_breaker_v3
 import plotly.graph_objects as go
 
 # Configuración de la página
@@ -26,6 +27,7 @@ opcion = st.sidebar.radio(
         "🏠 Inicio",
         "🔐 Vigenère (Polialfabético)",
         "🔎 Método de Kasiski",
+        "🔓 Romper Vigenère",
         "🔤 Alfabeto Mixto",
         "🔍 Criptoanálisis",
         "📊 Comparador César vs Afín",
@@ -44,10 +46,11 @@ if opcion == "🏠 Inicio":
         st.markdown("""
         1. **🔐 Vigenère** - Cifrador polialfabético con análisis detallado
         2. **🔎 Kasiski** - Detecta la longitud probable de clave
-        3. **🔤 Alfabeto Mixto** - Generador de alfabetos personalizados
-        4. **🔍 Criptoanálisis** - Ataque por ecuaciones simultáneas
-        5. **📊 Comparador** - Análisis César vs Afín
-        6. **✔ Validador** - Verifica parámetros criptográficos
+        3. **🔓 Romper Vigenère** - Descifra automáticamente con Chi-Squared
+        4. **🔤 Alfabeto Mixto** - Generador de alfabetos personalizados
+        5. **🔍 Criptoanálisis** - Ataque por ecuaciones simultáneas
+        6. **📊 Comparador** - Análisis César vs Afín
+        7. **✔ Validador** - Verifica parámetros criptográficos
         """)
 
     with col2:
@@ -66,8 +69,13 @@ if opcion == "🏠 Inicio":
     st.info("""
     **Para principiantes:**
     1. Comienza con el **Comparador** para entender César vs Afín
-    2. Explora **Vigenère** para ver cifrados polialfabéticos
-    3. Usa **Kasiski** para romper Vigenère
+    2. Explora **Vigenère** para cifrar/descifrar
+    3. Usa **Kasiski** para encontrar la longitud de clave
+
+    **Para ataques criptoanalíticos:**
+    1. **Kasiski** → Encuentra longitud de clave
+    2. **Romper Vigenère** → Encuentra la clave exacta
+    3. **Verifica** que el descifrado tenga sentido
 
     **Para avanzados:**
     1. Intenta **Criptoanálisis** con ecuaciones
@@ -96,7 +104,7 @@ elif opcion == "🔐 Vigenère (Polialfabético)":
 
                     st.success("✔ Cifrado exitoso")
 
-                    tab1, tab2, tab3, tab4 = st.tabs(["Resultados", "Proceso", "Análisis", "Información"])
+                    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Resultados", "Proceso Simple", "Proceso Detallado", "Análisis", "Información"])
 
                     with tab1:
                         col_a, col_b = st.columns(2)
@@ -114,15 +122,20 @@ elif opcion == "🔐 Vigenère (Polialfabético)":
                         st.code(resultado["descifrado"], language=None)
 
                     with tab2:
-                        st.write("**Proceso Paso a Paso:**")
+                        st.write("**Proceso Paso a Paso (Forma Simple):**")
                         st.code(resultado["proceso"], language=None)
 
                     with tab3:
+                        st.write("**Proceso Paso a Paso (Valores Numéricos):**")
+                        proceso_detallado = vigenere_lib.mostrar_proceso_detallado(texto, clave)
+                        st.code(proceso_detallado, language=None)
+
+                    with tab4:
                         st.write("**Análisis Polialfabético:**")
                         st.code(resultado["analisis"], language=None)
                         st.info("🔍 Observe cómo cada letra se cifra de múltiples formas según su posición.")
 
-                    with tab4:
+                    with tab5:
                         st.markdown("""
                         **¿Cómo funciona Vigenère?**
                         - Cada letra de la clave actúa como desplazamiento
@@ -193,6 +206,77 @@ elif opcion == "🔎 Método de Kasiski":
                         **¿Por qué funciona?**
                         Si el mismo texto se cifra con la misma parte de la clave,
                         aparecerá el mismo criptograma, y la distancia será múltiplo de la longitud.
+                        """)
+
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+
+# ======================== 🔓 ROMPER VIGENÈRE ========================
+elif opcion == "🔓 Romper Vigenère":
+    st.header("🔓 Romper Cifrado Vigenère")
+    st.markdown("Descifra Vigenère automáticamente conociendo la longitud de la clave. Utiliza análisis estadístico (Chi-Squared Test).")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        criptograma = st.text_area("Criptograma (texto cifrado):", placeholder="Pegue el texto cifrado aquí", height=120)
+
+    with col2:
+        longitud_clave = st.number_input("Longitud de clave (encontrada con Kasiski):", min_value=1, max_value=20, value=7)
+
+        if st.button("🔓 Descifrar", key="btn_romper_vigenere"):
+            if not criptograma:
+                st.error("❌ Por favor ingrese un criptograma")
+            else:
+                try:
+                    with st.spinner("⏳ Analizando con Chi-Squared Test..."):
+                        resultado = vigenere_breaker_v3.romper_vigenere_v3(criptograma, longitud_clave)
+
+                    st.success("✔ Descifrado completado")
+
+                    tab1, tab2, tab3 = st.tabs(["Resultado", "Análisis Detallado", "Información"])
+
+                    with tab1:
+                        col_res1, col_res2 = st.columns(2)
+                        with col_res1:
+                            st.write("**Clave encontrada:**")
+                            st.code(resultado["clave"], language=None)
+                        with col_res2:
+                            st.write("**Score (Chi²):**")
+                            st.metric("Chi² Score", f"{resultado['chi2_score']:.2f}")
+
+                        st.write("**Texto descifrado:**")
+                        st.code(resultado["descifrado"], language=None)
+
+                    with tab2:
+                        st.write("**Método:** Chi-Squared Test")
+                        st.write("**¿Cómo funciona?**")
+                        st.markdown("""
+                        1. Divide el criptograma en columnas según la longitud de clave
+                        2. Para cada columna, prueba los 26 desplazamientos posibles
+                        3. Calcula chi-squared entre frecuencias observadas y esperadas en inglés
+                        4. Selecciona el desplazamiento con el chi-squared más bajo (mejor coincidencia)
+                        5. Reconstruye la clave completa
+
+                        **Ventajas:**
+                        - Rápido incluso para claves largas (hasta 10+ caracteres)
+                        - Basado en análisis estadístico matemático
+                        - Preciso para textos en inglés
+                        """)
+
+                        st.info("💡 **Flujo recomendado:**\n1. Use Kasiski para encontrar la longitud\n2. Use esta herramienta para encontrar la clave\n3. Verifique que el descifrado tenga sentido")
+
+                    with tab3:
+                        st.markdown("""
+                        **¿Cuándo usar esta herramienta?**
+                        - Cuando ya conoces la longitud de la clave (por Kasiski)
+                        - Cuando tienes un criptograma de Vigenère
+                        - Para textos en inglés o español
+
+                        **Limitaciones:**
+                        - Funciona mejor con textos largos (>200 caracteres)
+                        - Requiere que el texto sea realmente en inglés
+                        - No funciona bien con textos muy cortos
                         """)
 
                 except Exception as e:
