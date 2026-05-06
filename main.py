@@ -1,9 +1,10 @@
 import gcd_lib
 import alfabeto_lib
-import criptoanalisis_lib
-import comparador_lib
 import vigenere_lib
 import kasiski_lib
+from cripto_analisis_comparador.criptoanalisis import criptoanalisis
+from cripto_analisis_comparador.comparador import ejecutar_comparador
+from cripto_analisis_comparador.alfabetos import obtener_alfabeto, mostrar_menu_alfabetos
 
 def pedir_entero(mensaje):
     """Pide un número entero de forma segura"""
@@ -82,54 +83,29 @@ def menu():
 
         elif opcion == "5":
             print("\n🔍 CRIPTOANÁLISIS (C = aM + b mod n)")
-            print("👉 Ingresa valores numéricos (A=0, B=1, ..., Z=25)")
 
-            C1 = pedir_entero("Ingrese C1: ")
-            M1 = pedir_entero("Ingrese M1: ")
-            C2 = pedir_entero("Ingrese C2: ")
-            M2 = pedir_entero("Ingrese M2: ")
-            n = pedir_entero("Ingrese módulo n (ej: 26): ")
+            mostrar_menu_alfabetos()
+            opcion_alfabeto = input("Seleccione el tipo de alfabeto: ")
+            alfabeto = obtener_alfabeto(opcion_alfabeto)
 
-            resultado = criptoanalisis_lib.resolver_afine(C1, M1, C2, M2, n)
+            if not alfabeto:
+                print("❌ Error: opción de alfabeto inválida")
+                continue
 
-            print("\n📌 RESULTADO:")
-            print(resultado)
+            criptoanalisis(alfabeto)
 
         elif opcion == "6":
             print("\n📊 COMPARADOR DE CIFRAS (César vs Afín)")
 
-            texto = input("Ingrese texto: ")
-            k = pedir_entero("Ingrese k (César): ")
-            a = pedir_entero("Ingrese a (Afín): ")
-            b = pedir_entero("Ingrese b (Afín): ")
+            mostrar_menu_alfabetos()
+            opcion_alfabeto = input("Seleccione el tipo de alfabeto: ")
+            alfabeto = obtener_alfabeto(opcion_alfabeto)
 
-            resultado = comparador_lib.comparar_cifras(texto, k, a, b)
-
-            if isinstance(resultado, str):
-                print("\n❌ Error:", resultado)
+            if not alfabeto:
+                print("❌ Error: opción de alfabeto inválida")
                 continue
 
-            print("\n📌 RESULTADOS:")
-            print("Original:", resultado["original"])
-            print("César:  ", resultado["cesar"])
-            print("Afín:   ", resultado["afin"])
-
-            print("\n📊 ÍNDICE DE COINCIDENCIA:")
-            print("IC Original:", resultado["IC_original"])
-            print("IC César:", resultado["IC_cesar"])
-            print("IC Afín:", resultado["IC_afin"])
-
-            print("\n🔤 MAPEO (primeras letras):")
-
-            # Mostrar solo primeras 10 letras para no saturar
-            mapa_cesar = list(resultado["mapa_cesar"].items())[:10]
-            mapa_afin = list(resultado["mapa_afin"].items())[:10]
-
-            print("César:", mapa_cesar)
-            print("Afín: ", mapa_afin)
-
-            print("\n🧠 ANÁLISIS:")
-            print(resultado["analisis"])
+            ejecutar_comparador(alfabeto)
 
         elif opcion == "7":
             print("\n🔐 VIGENÈRE (POLIALFABÉTICO)")

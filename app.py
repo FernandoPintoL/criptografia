@@ -1,12 +1,13 @@
 import streamlit as st
 import gcd_lib
 import alfabeto_lib
-import criptoanalisis_lib
-import comparador_lib
 import vigenere_lib
 import kasiski_lib
 import vigenere_breaker_v3
 import plotly.graph_objects as go
+from cripto_analisis_comparador.criptoanalisis import criptoanalisis, resolver_afin
+from cripto_analisis_comparador.comparador import comparar_cifrados
+from cripto_analisis_comparador.alfabetos import obtener_alfabeto, mostrar_menu_alfabetos
 
 # Configuración de la página
 st.set_page_config(
@@ -25,13 +26,16 @@ opcion = st.sidebar.radio(
     "📋 Selecciona una opción",
     [
         "🏠 Inicio",
-        "🔐 Vigenère (Polialfabético)",
-        "🔎 Método de Kasiski",
-        "🔓 Romper Vigenère",
-        "🔤 Alfabeto Mixto",
-        "🔍 Criptoanálisis",
-        "📊 Comparador César vs Afín",
-        "✔ Validador de Constante"
+        "1️⃣ Calcular MCD",
+        "2️⃣ Verificar si son coprimos",
+        "3️⃣ Validar constante (cripto)",
+        "4️⃣ Generar alfabeto mixto 🔤",
+        "5️⃣ Criptoanálisis (resolver a y b) 🔍",
+        "6️⃣ Comparar César vs Afín 📊",
+        "7️⃣ Vigenère (polialfabético) 🔐",
+        "8️⃣ Método de Kasiski 🔎",
+        "9️⃣ Romper Vigenère",
+        "0️⃣ Salir"
     ]
 )
 
@@ -83,8 +87,43 @@ if opcion == "🏠 Inicio":
     3. Valida constantes con el **Validador**
     """)
 
-# ======================== 🔐 VIGENÈRE ========================
-elif opcion == "🔐 Vigenère (Polialfabético)":
+# ======================== 1️⃣ CALCULAR MCD ========================
+elif opcion == "1️⃣ Calcular MCD":
+    st.header("1️⃣ Calcular MCD")
+    st.markdown("Calcula el Máximo Común Divisor de dos números usando el algoritmo de Euclides.")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        a = st.number_input("Número a:", min_value=0, value=48)
+    with col2:
+        b = st.number_input("Número b:", min_value=0, value=18)
+
+    if st.button("🔢 Calcular MCD", key="btn_mcd"):
+        resultado = gcd_lib.gcd(a, b)
+        st.success(f"✔ MCD({a}, {b}) = **{resultado}**")
+
+# ======================== 2️⃣ VERIFICAR COPRIMOS ========================
+elif opcion == "2️⃣ Verificar si son coprimos":
+    st.header("2️⃣ Verificar si son coprimos")
+    st.markdown("Dos números son coprimos si su MCD es 1 (no comparten factores comunes).")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        a = st.number_input("Número a:", min_value=1, value=7)
+    with col2:
+        b = st.number_input("Número b:", min_value=1, value=26)
+
+    if st.button("✔ Verificar Coprimos", key="btn_coprimos"):
+        mcd_valor = gcd_lib.gcd(a, b)
+        if mcd_valor == 1:
+            st.success(f"✔ **{a} y {b} son coprimos** (MCD = 1)")
+            st.info("Esto significa que pueden usarse en el Cifrado Afín")
+        else:
+            st.error(f"❌ **{a} y {b} NO son coprimos** (MCD = {mcd_valor})")
+            st.warning(f"Comparten factores comunes. No son válidos para Cifrado Afín")
+
+# ======================== 7️⃣ VIGENÈRE ========================
+elif opcion == "7️⃣ Vigenère (polialfabético) 🔐":
     st.header("🔐 Cifrado de Vigenère")
     st.markdown("Cifrador polialfabético que demuestra cómo una misma letra se cifra diferente según su posición.")
 
@@ -152,7 +191,7 @@ elif opcion == "🔐 Vigenère (Polialfabético)":
                     st.error(f"❌ Error: {e}")
 
 # ======================== 🔎 KASISKI ========================
-elif opcion == "🔎 Método de Kasiski":
+elif opcion == "8️⃣ Método de Kasiski 🔎":
     st.header("🔎 Método de Kasiski")
     st.markdown("Detecta la longitud probable de clave en cifrados de Vigenère buscando repeticiones.")
 
@@ -212,7 +251,7 @@ elif opcion == "🔎 Método de Kasiski":
                     st.error(f"❌ Error: {e}")
 
 # ======================== 🔓 ROMPER VIGENÈRE ========================
-elif opcion == "🔓 Romper Vigenère":
+elif opcion == "9️⃣ Romper Vigenère":
     st.header("🔓 Romper Cifrado Vigenère")
     st.markdown("Descifra Vigenère automáticamente conociendo la longitud de la clave. Utiliza análisis estadístico (Chi-Squared Test).")
 
@@ -282,8 +321,8 @@ elif opcion == "🔓 Romper Vigenère":
                 except Exception as e:
                     st.error(f"❌ Error: {e}")
 
-# ======================== 🔤 ALFABETO MIXTO ========================
-elif opcion == "🔤 Alfabeto Mixto":
+# ======================== 4️⃣ ALFABETO MIXTO ========================
+elif opcion == "4️⃣ Generar alfabeto mixto 🔤":
     st.header("🔤 Generador de Alfabetos Mixtos")
     st.markdown("Crea alfabetos personalizados basados en palabras clave para dificultar el análisis.")
 
@@ -355,164 +394,193 @@ elif opcion == "🔤 Alfabeto Mixto":
             except Exception as e:
                 st.error(f"❌ Error: {e}")
 
-# ======================== 🔍 CRIPTOANÁLISIS ========================
-elif opcion == "🔍 Criptoanálisis":
+# ======================== 5️⃣ CRIPTOANÁLISIS ========================
+elif opcion == "5️⃣ Criptoanálisis (resolver a y b) 🔍":
     st.header("🔍 Criptoanálisis por Ecuaciones")
     st.markdown("Ataque al Cifrado Afín mediante dos correspondencias conocidas: C₁=aM₁+b y C₂=aM₂+b")
 
-    st.info("💡 Ingrese dos pares (Criptograma, Plaintext) y el sistema resolverá para hallar `a` y `b`")
+    st.info("💡 Seleccione un alfabeto e ingrese dos pares (letra) y el sistema resolverá para hallar `a` y `b`")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
 
     with col1:
-        st.write("**Primer par:**")
-        C1 = st.number_input("C₁ (criptograma 1):", min_value=0, max_value=25, value=5)
-        M1 = st.number_input("M₁ (plaintext 1):", min_value=0, max_value=25, value=0)
+        st.write("**Seleccionar Alfabeto:**")
+
+        opciones_alfabeto = {
+            "1": "Alfabeto estándar (A-Z)",
+            "2": "Español",
+            "3": "Español extendido",
+            "4": "Números",
+            "5": "Alfanumérico"
+        }
+
+        opcion_sel = st.selectbox("Tipo de alfabeto:", list(opciones_alfabeto.values()))
+        clave_opcion = [k for k, v in opciones_alfabeto.items() if v == opcion_sel][0]
+        alfabeto = obtener_alfabeto(clave_opcion)
+
+        if alfabeto:
+            n = len(alfabeto)
+            st.success(f"✔ Alfabeto seleccionado (n={n})")
+            st.write(f"Alfabeto: {alfabeto}")
 
     with col2:
-        st.write("**Segundo par:**")
-        C2 = st.number_input("C₂ (criptograma 2):", min_value=0, max_value=25, value=8)
-        M2 = st.number_input("M₂ (plaintext 2):", min_value=0, max_value=25, value=1)
+        if alfabeto:
+            st.write("**Ingrese dos pares de correspondencia:**")
 
-    with col3:
-        st.write("**Parámetros:**")
-        n = st.number_input("Módulo n:", min_value=1, max_value=1000, value=26)
-        if st.button("🔍 Resolver", key="btn_crypto"):
-            resultado = criptoanalisis_lib.resolver_afine(C1, M1, C2, M2, n)
+            col_m1, col_c1 = st.columns(2)
+            with col_m1:
+                M1_letra = st.selectbox("M₁ (plaintext 1):", list(alfabeto), key="M1")
+                M1 = alfabeto.index(M1_letra)
+            with col_c1:
+                C1_letra = st.selectbox("C₁ (criptograma 1):", list(alfabeto), key="C1")
+                C1 = alfabeto.index(C1_letra)
 
-            if "✔" in resultado:
-                st.success(resultado)
+            col_m2, col_c2 = st.columns(2)
+            with col_m2:
+                M2_letra = st.selectbox("M₂ (plaintext 2):", list(alfabeto), key="M2")
+                M2 = alfabeto.index(M2_letra)
+            with col_c2:
+                C2_letra = st.selectbox("C₂ (criptograma 2):", list(alfabeto), key="C2")
+                C2 = alfabeto.index(C2_letra)
 
-                # Extraer a y b
-                lineas = resultado.split('\n')
-                datos = lineas[0].split(',')
-                a = int(datos[0].split('=')[1].strip())
-                b = int(datos[1].split('=')[1].strip())
+            if st.button("🔍 Resolver", key="btn_crypto"):
+                resultado = resolver_afin(M1, C1, M2, C2, n)
 
-                st.divider()
+                if resultado["exito"]:
+                    st.success("✔ Sistema resuelto")
 
-                tab1, tab2 = st.tabs(["Verificación", "Información"])
+                    a = resultado["a"]
+                    b = resultado["b"]
 
-                with tab1:
-                    st.write("**Verificación de la solución:**")
-                    col_v1, col_v2 = st.columns(2)
+                    st.divider()
 
-                    with col_v1:
-                        C1_calc = (a * M1 + b) % n
-                        C2_calc = (a * M2 + b) % n
-                        st.write(f"C₁ = ({a} × {M1} + {b}) mod {n} = {C1_calc} ✓" if C1_calc == C1 else f"Error: {C1_calc} ≠ {C1}")
-                        st.write(f"C₂ = ({a} × {M2} + {b}) mod {n} = {C2_calc} ✓" if C2_calc == C2 else f"Error: {C2_calc} ≠ {C2}")
+                    tab1, tab2 = st.tabs(["Verificación", "Información"])
 
-                with tab2:
-                    st.markdown(f"""
-                    **Parámetros encontrados:**
-                    - a = {a} (multiplicador)
-                    - b = {b} (desplazamiento)
-                    - n = {n} (módulo)
+                    with tab1:
+                        st.write("**Verificación de la solución:**")
+                        col_v1, col_v2 = st.columns(2)
 
-                    **Fórmula:** C = ({a}M + {b}) mod {n}
+                        with col_v1:
+                            C1_calc = (a * M1 + b) % n
+                            C2_calc = (a * M2 + b) % n
+                            st.write(f"C₁ = ({a} × {M1} + {b}) mod {n} = {C1_calc} ✓" if C1_calc == C1 else f"Error: {C1_calc} ≠ {C1}")
+                            st.write(f"C₂ = ({a} × {M2} + {b}) mod {n} = {C2_calc} ✓" if C2_calc == C2 else f"Error: {C2_calc} ≠ {C2}")
 
-                    **Sistema resuelto:**
-                    1. ΔC = {(C1-C2)%n}, ΔM = {(M1-M2)%n}
-                    2. a ≡ ΔC × (ΔM)⁻¹ (mod {n})
-                    3. b ≡ C₁ - a×M₁ (mod {n})
-                    """)
-            else:
-                st.error(resultado)
-                st.warning("⚠️ No se pudo resolver el sistema. Verifique que las correspondencias sean válidas.")
+                    with tab2:
+                        st.markdown(f"""
+                        **Parámetros encontrados:**
+                        - a = {a} (multiplicador)
+                        - b = {b} (desplazamiento)
+                        - n = {n} (módulo)
 
-# ======================== 📊 COMPARADOR ========================
-elif opcion == "📊 Comparador César vs Afín":
+                        **Fórmula:** C = ({a}M + {b}) mod {n}
+
+                        **Sistema resuelto:**
+                        1. ΔC = {(C1-C2)%n}, ΔM = {(M1-M2)%n}
+                        2. a ≡ ΔC × (ΔM)⁻¹ (mod {n})
+                        3. b ≡ C₁ - a×M₁ (mod {n})
+                        """)
+                else:
+                    st.error(f"❌ {resultado['mensaje']}")
+                    st.warning("⚠️ No se pudo resolver el sistema. Verifique que las correspondencias sean válidas.")
+
+# ======================== 6️⃣ COMPARADOR ========================
+elif opcion == "6️⃣ Comparar César vs Afín 📊":
     st.header("📊 Comparador de Cifras Clásicas")
     st.markdown("Cifra el mismo mensaje con César y Afín para observar cómo cambia la distribución.")
 
     col1, col2 = st.columns(2)
 
     with col1:
+        st.write("**Seleccionar Alfabeto:**")
+
+        opciones_alfabeto = {
+            "1": "Alfabeto estándar (A-Z)",
+            "2": "Español",
+            "3": "Español extendido",
+            "4": "Números",
+            "5": "Alfanumérico"
+        }
+
+        opcion_sel = st.selectbox("Tipo de alfabeto:", list(opciones_alfabeto.values()), key="comp_alfabeto")
+        clave_opcion = [k for k, v in opciones_alfabeto.items() if v == opcion_sel][0]
+        alfabeto = obtener_alfabeto(clave_opcion)
+
+        if alfabeto:
+            st.success(f"✔ Alfabeto seleccionado (n={len(alfabeto)})")
+
         texto = st.text_area("Texto a cifrar:", placeholder="Ingrese el texto", height=80)
-        k = st.number_input("k (desplazamiento César):", min_value=1, max_value=25, value=3)
 
     with col2:
-        a = st.number_input("a (multiplicador Afín):", min_value=1, max_value=25, value=5)
-        b = st.number_input("b (desplazamiento Afín):", min_value=0, max_value=25, value=8)
+        if alfabeto:
+            k = st.number_input("k (desplazamiento César):", min_value=1, max_value=len(alfabeto)-1, value=3)
+            a = st.number_input("a (multiplicador Afín):", min_value=1, max_value=len(alfabeto)-1, value=5)
+            b = st.number_input("b (desplazamiento Afín):", min_value=0, max_value=len(alfabeto)-1, value=8)
 
-        if st.button("📊 Comparar", key="btn_comparar"):
-            resultado = comparador_lib.comparar_cifras(texto, k, a, b)
+            if st.button("📊 Comparar", key="btn_comparar"):
+                try:
+                    resultado = comparar_cifrados(texto, k, a, b, alfabeto)
 
-            if isinstance(resultado, str):
-                st.error(resultado)
-            else:
-                st.success("✔ Análisis completado")
+                    st.success("✔ Análisis completado")
 
-                tab1, tab2, tab3, tab4 = st.tabs(["Resultados", "Frecuencias", "Mapeos", "Análisis"])
+                    tab1, tab2, tab3, tab4 = st.tabs(["Resultados", "Índice de Coincidencia", "Frecuencias", "Análisis"])
 
-                with tab1:
-                    col_res1, col_res2, col_res3 = st.columns(3)
+                    with tab1:
+                        col_res1, col_res2, col_res3 = st.columns(3)
 
-                    with col_res1:
-                        st.write("**Original:**")
-                        st.code(resultado["original"], language=None)
+                        with col_res1:
+                            st.write("**Original:**")
+                            st.code(resultado["original"], language=None)
 
-                    with col_res2:
-                        st.write("**César (k={}):**".format(k))
-                        st.code(resultado["cesar"], language=None)
+                        with col_res2:
+                            st.write("**César (k={}):**".format(k))
+                            st.code(resultado["cesar"], language=None)
 
-                    with col_res3:
-                        st.write("**Afín (a={}, b={}):**".format(a, b))
-                        st.code(resultado["afin"], language=None)
+                        with col_res3:
+                            st.write("**Afín (a={}, b={}):**".format(a, b))
+                            st.code(resultado["afin"], language=None)
 
-                with tab2:
-                    col_freq1, col_freq2 = st.columns(2)
-
-                    with col_freq1:
+                    with tab2:
                         st.write("**IC (Índice de Coincidencia):**")
                         col_ic1, col_ic2, col_ic3 = st.columns(3)
-                        col_ic1.metric("Original", f"{resultado['IC_original']:.4f}")
-                        col_ic2.metric("César", f"{resultado['IC_cesar']:.4f}")
-                        col_ic3.metric("Afín", f"{resultado['IC_afin']:.4f}")
+                        col_ic1.metric("Original", f"{resultado['indice_coincidencia']['original']:.4f}")
+                        col_ic2.metric("César", f"{resultado['indice_coincidencia']['cesar']:.4f}")
+                        col_ic3.metric("Afín", f"{resultado['indice_coincidencia']['afin']:.4f}")
                         st.info("El IC mide la probabilidad de coincidencia. En monoalfabéticos es igual en todos.")
 
-                    with col_freq2:
+                    with tab3:
                         st.write("**Distribución de Frecuencias:**")
-                        freq_orig = {k: v for k, v in sorted(resultado["freq_original"].items(), key=lambda x: x[1], reverse=True)[:5]}
-                        freq_cesar = {k: v for k, v in sorted(resultado["freq_cesar"].items(), key=lambda x: x[1], reverse=True)[:5]}
-                        freq_afin = {k: v for k, v in sorted(resultado["freq_afin"].items(), key=lambda x: x[1], reverse=True)[:5]}
+                        freq_orig = {k: v for k, v in sorted(resultado["frecuencias"]["original"].items(), key=lambda x: x[1], reverse=True)[:5]}
+                        freq_cesar = {k: v for k, v in sorted(resultado["frecuencias"]["cesar"].items(), key=lambda x: x[1], reverse=True)[:5]}
+                        freq_afin = {k: v for k, v in sorted(resultado["frecuencias"]["afin"].items(), key=lambda x: x[1], reverse=True)[:5]}
 
-                        st.write("**Top 5 (Original):**")
-                        st.bar_chart(freq_orig)
-                        st.write("**Top 5 (César):**")
-                        st.bar_chart(freq_cesar)
-                        st.write("**Top 5 (Afín):**")
-                        st.bar_chart(freq_afin)
+                        col_f1, col_f2, col_f3 = st.columns(3)
+                        with col_f1:
+                            st.write("**Top 5 (Original):**")
+                            st.bar_chart(freq_orig)
+                        with col_f2:
+                            st.write("**Top 5 (César):**")
+                            st.bar_chart(freq_cesar)
+                        with col_f3:
+                            st.write("**Top 5 (Afín):**")
+                            st.bar_chart(freq_afin)
 
-                with tab3:
-                    col_map1, col_map2 = st.columns(2)
+                    with tab4:
+                        st.markdown("""
+                        **Análisis:**
+                        Ambos son monoalfabéticos: preservan frecuencias.
 
-                    with col_map1:
-                        st.write("**Mapeo César:**")
-                        mapa_texto = ""
-                        for letra, cifrada in list(resultado["mapa_cesar"].items())[:13]:
-                            mapa_texto += f"{letra}→{cifrada} "
-                        st.code(mapa_texto + "\n...")
+                        - Afín es más seguro que César, pero aún débil
+                        - La distribución de frecuencias no cambia
+                        - Vulnerables a análisis de frecuencias
+                        - El Índice de Coincidencia debe ser similar en ambos
+                        """)
 
-                    with col_map2:
-                        st.write("**Mapeo Afín:**")
-                        mapa_texto = ""
-                        for letra, cifrada in list(resultado["mapa_afin"].items())[:13]:
-                            mapa_texto += f"{letra}→{cifrada} "
-                        st.code(mapa_texto + "\n...")
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
 
-                with tab4:
-                    st.write(resultado["analisis"])
-                    st.warning("""
-                    ⚠️ **Conclusión:**
-                    Ambos son monoalfabéticos: preservan frecuencias.
-                    Afín es más seguro que César, pero aún débil.
-                    Vulnerables a análisis de frecuencias.
-                    """)
-
-# ======================== ✔ VALIDADOR ========================
-elif opcion == "✔ Validador de Constante":
+# ======================== 3️⃣ VALIDADOR ========================
+elif opcion == "3️⃣ Validar constante (cripto)":
     st.header("✔ Validador de Constante de Decimación")
     st.markdown("Verifica si una constante `a` es válida para el Cifrado Afín.")
 
@@ -546,6 +614,10 @@ elif opcion == "✔ Validador de Constante":
                 - Sin inverso, no se puede descifrar correctamente
                 - CCR = Conjunto Completo de Residuos
                 """)
+
+# ======================== 0️⃣ SALIR ========================
+elif opcion == "0️⃣ Salir":
+    st.info("👋 ¡Hasta luego!")
 
 # Footer
 st.divider()
