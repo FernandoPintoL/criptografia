@@ -32,7 +32,10 @@ def resolver_afin(M1, C1, M2, C2, n):
     """
 
     if M1 == M2:
-        raise ValueError("M1 y M2 no pueden ser iguales")
+        return {
+            "exito": False,
+            "mensaje": "M1 y M2 no pueden ser iguales"
+        }
 
     delta_M = (M1 - M2) % n
     delta_C = (C1 - C2) % n
@@ -56,14 +59,18 @@ def resolver_afin(M1, C1, M2, C2, n):
     a = (delta_C * inv) % n
     b = (C1 - a * M1) % n
 
+    if a == 0:
+        return {
+            "exito": False,
+            "mensaje": "El sistema da a = 0, pero no es válido para un cifrado Afín reversible"
+        }
+
     return {
         "exito": True,
         "a": a,
         "b": b,
         "ecuacion": f"C = ({a}M + {b}) mod {n}"
     }
-
-
 def criptoanalisis(alfabeto):
 
     n = len(alfabeto)
