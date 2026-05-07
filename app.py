@@ -439,14 +439,23 @@ elif opcion == "4️⃣ Generar alfabeto mixto 🔤":
 
     with col1:
         clave = st.text_input("Palabra clave (opcional):", placeholder="Ej: SECRETO")
+        modo_aleatorio = st.checkbox("🎲 Modo aleatorio", value=False)
+
+    with col2:
         if st.button("🔤 Generar", key="btn_alfabeto"):
             try:
-                resultado = alfabeto_lib.generar_alfabeto_mixto(clave)
+                resultado = alfabeto_lib.generar_alfabeto_mixto(clave, aleatorio=modo_aleatorio)
 
-                tab1, tab2 = st.tabs(["Resultado", "Información"])
+                tab1, tab2, tab3 = st.tabs(["Resultado", "Detalles", "Información"])
 
                 with tab1:
                     st.success("✔ Alfabeto generado")
+
+                    # Modo indicator
+                    if resultado["modo"] == "aleatorio":
+                        st.info("🎲 Modo ALEATORIO - El resto del alfabeto está mezclado al azar")
+                    else:
+                        st.info("📝 Modo NORMAL - El resto del alfabeto está en orden A-Z")
 
                     col_a, col_b = st.columns(2)
                     with col_a:
@@ -457,8 +466,8 @@ elif opcion == "4️⃣ Generar alfabeto mixto 🔤":
                         st.code(resultado["clave_limpia"], language=None)
 
                     with col_b:
-                        st.write("**Alfabeto Base:**")
-                        st.code(resultado["alfabeto_base"], language=None)
+                        st.write("**Modo:**")
+                        st.metric("Tipo de Generación", resultado["modo"].upper())
 
                         st.write("**Longitud:**")
                         st.metric("Caracteres", resultado["longitud"])
@@ -468,7 +477,7 @@ elif opcion == "4️⃣ Generar alfabeto mixto 🔤":
                     st.code(resultado["alfabeto_mixto"], language=None)
 
                     # Mapeo visual
-                    st.write("**Mapeo de Sustitución:**")
+                    st.write("**Mapeo de Sustitución (primeros 5 caracteres):**")
                     alfabeto_base = resultado["alfabeto_base"]
                     alfabeto_mixto = resultado["alfabeto_mixto"]
 
@@ -484,20 +493,63 @@ elif opcion == "4️⃣ Generar alfabeto mixto 🔤":
                         st.code(mapeo_a)
 
                 with tab2:
+                    st.write("**Alfabeto Base:**")
+                    st.code(resultado["alfabeto_base"], language=None)
+
+                    st.write("**Estructura del Alfabeto Generado:**")
+                    if resultado["clave_limpia"]:
+                        st.write(f"1. **Clave limpia:** {resultado['clave_limpia']} ({len(resultado['clave_limpia'])} caracteres)")
+                        st.write(f"2. **Resto del alfabeto:** {len(resultado['alfabeto_base']) - len(resultado['clave_limpia'])} caracteres")
+                        if resultado["modo"] == "aleatorio":
+                            st.write("   - Ordenamiento: ALEATORIO (cada ejecución es diferente)")
+                        else:
+                            st.write("   - Ordenamiento: NORMAL (en orden alfabético)")
+                    else:
+                        st.write("- Sin clave, el alfabeto completo se genera")
+                        if resultado["modo"] == "aleatorio":
+                            st.write("  en orden ALEATORIO (sustitución pura aleatoria)")
+                        else:
+                            st.write("  en orden NORMAL (A-Z)")
+
+                    st.write("**Alfabeto Mixto Completo:**")
+                    st.code(resultado["alfabeto_mixto"], language=None)
+
+                with tab3:
                     st.markdown("""
                     **¿Cómo funciona?**
+
+                    **Modo NORMAL (predecible):**
                     1. Se limpia la clave (mayúsculas, sin duplicados)
                     2. Se coloca la clave al inicio del alfabeto
-                    3. Se agregan las letras restantes en orden
+                    3. Se agregan las letras restantes EN ORDEN A-Z
 
-                    **Ejemplo con clave "SECRETO":**
+                    Ejemplo con clave "SECRETO":
                     - Original: ABCDEFGHIJKLMNOPQRSTUVWXYZ
-                    - Mixto: SECRETOABDFGHIJKLMNOPQUVWXYZ
+                    - Mixto:    SECRTOABDFGHIJKLMNOPQUVWXYZ
+                    - Uso: Educativo, fácil de entender
+
+                    **Modo ALEATORIO (más seguro):**
+                    1. Se limpia la clave (mayúsculas, sin duplicados)
+                    2. Se coloca la clave al inicio del alfabeto
+                    3. Se agregan las letras restantes MEZCLADAS ALEATORIAMENTE
+
+                    Ejemplo con clave "SECRETO":
+                    - Original: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                    - Mixto:    SECRTOFGPWZBMJUQINLXVKHDYA  (aleatorio)
+                    - Cada ejecución es diferente!
+                    - Uso: Criptografía real, máxima seguridad
+
+                    **Sin clave + Aleatorio (Sustitución Pura):**
+                    - Genera un alfabeto completamente aleatorio
+                    - Máxima seguridad
+                    - No usa clave, es pura aleatoriedad
 
                     **Utilidad:**
-                    - Base para cifrados de sustitución simple
-                    - Inicialización de matriz Playfair
-                    - Análisis educativo
+                    - Educación: modo normal
+                    - Cifrados de sustitución simple: modo normal
+                    - Inicialización de matriz Playfair: modo aleatorio para seguridad
+                    - Análisis criptográfico: ambos modos
+                    - Investigación de fortaleza: modo aleatorio
                     """)
 
             except Exception as e:
