@@ -185,16 +185,101 @@ elif opcion == "7️⃣ Vigenère (polialfabético) 🔐":
                         st.info("🔍 Observe cómo cada letra se cifra de múltiples formas según su posición.")
 
                     with tab5:
-                        st.markdown("""
-                        **¿Cómo funciona Vigenère?**
-                        - Cada letra de la clave actúa como desplazamiento
-                        - A diferencia de César, el desplazamiento cambia en cada posición
-                        - Esto rompe la correspondencia única de los sistemas monoalfabéticos
+                        st.markdown("## 🔐 Cómo Funciona el Cifrado de Vigenère")
 
-                        **Fórmula:** C = (M + K) mod 26
-                        - C: letra cifrada
-                        - M: letra original
-                        - K: letra de la clave
+                        st.markdown("### Concepto Principal")
+                        st.info("""
+                        A diferencia de César (monoalfabético), Vigenère es **polialfabético**:
+                        - Cada posición usa un desplazamiento DIFERENTE
+                        - El desplazamiento es determinado por la clave
+                        - La misma letra se cifra de múltiples formas según su posición
+                        """)
+
+                        st.markdown("### Fórmula Matemática del Cifrado")
+                        st.latex(r"C_i = (M_i + K_i) \bmod 26")
+                        st.write("Donde:")
+                        st.write("- **C_i**: Letra cifrada en posición i")
+                        st.write("- **M_i**: Letra original en posición i")
+                        st.write("- **K_i**: Letra de la clave en posición i (repetida si es necesario)")
+                        st.write("- **mod 26**: Módulo 26 (número de letras en alfabeto)")
+
+                        st.markdown("### Fórmula Matemática del Descifrado")
+                        st.latex(r"M_i = (C_i - K_i) \bmod 26")
+                        st.write("Donde:")
+                        st.write("- **M_i**: Letra original (recuperada)")
+                        st.write("- **C_i**: Letra cifrada")
+                        st.write("- **K_i**: Letra de la clave")
+
+                        st.markdown("### Secuencia de Pasos Detallada")
+
+                        col_seq1, col_seq2 = st.columns([1, 2])
+
+                        with col_seq1:
+                            st.markdown("""
+                            **Paso 1:** Preparación
+
+                            **Paso 2:** Extensión
+
+                            **Paso 3:** Conversión
+
+                            **Paso 4:** Cifrado
+
+                            **Paso 5:** Verificación
+                            """)
+
+                        with col_seq2:
+                            st.markdown("""
+                            Convertir todo a mayúsculas, sin espacios
+
+                            Repetir la clave para igualar longitud del texto
+
+                            Convertir letras a números (A=0, B=1, ..., Z=25)
+
+                            Aplicar: C = (M + K) mod 26 a cada letra
+
+                            Convertir números cifrados de vuelta a letras
+                            """)
+
+                        st.markdown("### Ejemplo Visual Paso a Paso")
+
+                        st.write("**Datos de entrada:**")
+                        col_ej1, col_ej2, col_ej3 = st.columns(3)
+                        with col_ej1:
+                            st.write("Texto: HELLO")
+                        with col_ej2:
+                            st.write("Clave: SECRET")
+                        with col_ej3:
+                            st.write("Resultado: ?????")
+
+                        st.write("**Proceso letra por letra:**")
+
+                        ejemplos = [
+                            ("H", "S", "H(7) + S(18) = 25 mod 26 = 25 → Z"),
+                            ("E", "E", "E(4) + E(4) = 8 mod 26 = 8 → I"),
+                            ("L", "C", "L(11) + C(2) = 13 mod 26 = 13 → N"),
+                            ("L", "R", "L(11) + R(17) = 28 mod 26 = 2 → C"),
+                            ("O", "E", "O(14) + E(4) = 18 mod 26 = 18 → S"),
+                        ]
+
+                        for original, clave_letra, calculo in ejemplos:
+                            col_orig, col_clave, col_calc, col_cifrada = st.columns([1.5, 1.5, 4, 1])
+                            with col_orig:
+                                st.code(original)
+                            with col_clave:
+                                st.code(clave_letra)
+                            with col_calc:
+                                st.caption(calculo)
+                            with col_cifrada:
+                                st.code(calculo[-1])
+
+                        st.success("**Resultado Final: ZINCSI**")
+
+                        st.markdown("### Propiedades Criptográficas")
+                        st.markdown("""
+                        - **Polialfabético:** La misma letra se cifra de múltiples formas
+                        - **Período:** Se repite cada N letras (N = longitud de clave)
+                        - **Seguridad:** Más fuerte que César, pero vulnerable a Kasiski + Chi-Squared
+                        - **Frecuencias:** Oculta el análisis de frecuencias de una sola letra
                         """)
 
                 except Exception as e:
@@ -293,16 +378,132 @@ elif opcion == "8️⃣ Método de Kasiski 🔎":
                             st.write(f"- `{patron}` en posiciones: {posiciones}")
 
                     with tab4:
-                        st.markdown("""
-                        **¿Cómo funciona Kasiski?**
-                        1. Busca patrones repetidos de n caracteres
-                        2. Calcula distancias entre repeticiones
-                        3. Halla el MCD de todas las distancias
-                        4. El MCD (o sus divisores) es la longitud probable de clave
+                        st.markdown("## 🔎 Método de Kasiski - Análisis Profundo")
 
-                        **¿Por qué funciona?**
-                        Si el mismo texto se cifra con la misma parte de la clave,
-                        aparecerá el mismo criptograma, y la distancia será múltiplo de la longitud.
+                        st.markdown("### El Problema a Resolver")
+                        st.info("""
+                        Dado un criptograma de Vigenère:
+                        - **Objetivo:** Encontrar la LONGITUD de la clave
+                        - **Sin saber:** Cuál es la clave exacta
+                        - **Herramienta:** Análisis estadístico de repeticiones
+                        """)
+
+                        st.markdown("### Principio Matemático Fundamental")
+
+                        st.write("**Teorema de Kasiski:**")
+                        st.latex(r"\text{Si } d(\text{repetición}_1, \text{repetición}_2) = k, \text{ entonces } k \equiv 0 \pmod{n}")
+                        st.write("Donde:")
+                        st.write("- **d:** distancia entre dos repeticiones del mismo patrón")
+                        st.write("- **k:** la distancia calculada")
+                        st.write("- **n:** longitud de la clave (lo que buscamos)")
+
+                        st.write("**Explicación:**")
+                        st.write("""
+                        Si el mismo texto plano se cifra con las MISMAS letras de clave,
+                        aparecerá el mismo criptograma. La distancia entre estas repeticiones
+                        SIEMPRE será múltiplo de la longitud de clave.
+                        """)
+
+                        st.markdown("### Fórmula para Hallar la Longitud")
+                        st.latex(r"n = \gcd(d_1, d_2, d_3, ..., d_m)")
+                        st.write("Donde:")
+                        st.write("- **n:** Longitud probable de la clave")
+                        st.write("- **gcd:** Máximo Común Divisor")
+                        st.write("- **d_i:** Distancias entre repeticiones encontradas")
+
+                        st.markdown("### Secuencia de Pasos Detallada")
+
+                        st.markdown("#### Paso 1: Limpieza del Texto")
+                        st.write("Eliminar espacios, puntuación, convertir a mayúsculas")
+                        st.write("**Ejemplo:**")
+                        st.write("- Entrada: `The quick brown fox`")
+                        st.write("- Salida: `THEQUICKBROWNFOX`")
+
+                        st.markdown("#### Paso 2: Buscar Patrones Repetidos")
+                        st.write("Buscar secuencias de n caracteres que aparezcan más de una vez")
+                        st.latex(r"\text{Patrones encontrados: } \{(p_1, [pos_1, pos_2, ...]), (p_2, [...]), ...\}")
+                        st.write("**Ejemplo (buscando patrones de 3 caracteres):**")
+                        st.write("- Patrón `THE` aparece en posiciones [0, 15, 42]")
+                        st.write("- Patrón `QUI` aparece en posiciones [3, 18]")
+                        st.write("- Patrón `FOX` aparece en posiciones [10, 28]")
+
+                        st.markdown("#### Paso 3: Calcular Distancias")
+                        st.write("Para cada par de posiciones del mismo patrón, calcular la distancia")
+                        st.latex(r"d_{i,j} = pos_j - pos_i")
+                        st.write("**Ejemplo:**")
+                        st.write("- `THE` en [0, 15, 42] → distancias: 15-0=15, 42-0=42, 42-15=27")
+                        st.write("- `QUI` en [3, 18] → distancia: 18-3=15")
+                        st.write("- `FOX` en [10, 28] → distancia: 28-10=18")
+                        st.write("- **Todas las distancias:** [15, 42, 27, 15, 18]")
+
+                        st.markdown("#### Paso 4: Hallar el MCD")
+                        st.write("Calcular el Máximo Común Divisor de todas las distancias")
+                        st.latex(r"\gcd(15, 42, 27, 15, 18) = ?")
+                        st.write("**Factorización:**")
+                        st.write("- 15 = 3 × 5")
+                        st.write("- 42 = 2 × 3 × 7")
+                        st.write("- 27 = 3³")
+                        st.write("- 15 = 3 × 5")
+                        st.write("- 18 = 2 × 3²")
+                        st.write("- **MCD = 3** (el único factor común)")
+
+                        st.markdown("#### Paso 5: Encontrar Divisores (Posibles Longitudes)")
+                        st.write("Los divisores del MCD son posibles longitudes de clave")
+                        st.write("**Si MCD = 3:**")
+                        st.write("- Divisores: 1, 3")
+                        st.write("- Descartamos 1 (sería Caesar)")
+                        st.write("- **Conclusión: La clave probablemente tiene longitud 3**")
+
+                        st.markdown("### Diagrama del Flujo Completo")
+                        st.write("""
+                        ```
+                        CRIPTOGRAMA
+                           ↓
+                        [Paso 1] Limpiar
+                           ↓
+                        [Paso 2] Buscar repeticiones
+                           ↓
+                        [Paso 3] Calcular distancias
+                           ↓
+                        [Paso 4] Calcular MCD de distancias
+                           ↓
+                        [Paso 5] Encontrar divisores del MCD
+                           ↓
+                        LONGITUD PROBABLE DE CLAVE
+                        ```
+                        """)
+
+                        st.markdown("### Ejemplo Matemático Completo")
+                        st.write("**Entrada:** `LXFOPVEFRNHRABJKL` (pequeño criptograma)")
+                        st.write("**Patrón buscado:** 3 caracteres")
+                        st.write("**Patrón encontrado:** `FRN` en posiciones [8, 14]")
+                        st.write("**Distancia:** 14 - 8 = 6")
+                        st.write("**MCD de todas distancias:** 6")
+                        st.write("**Divisores:** 1, 2, 3, 6")
+                        st.write("**Conclusión:** Longitud probable: 2, 3 ó 6")
+
+                        st.markdown("### Por Qué Funciona Este Método")
+                        st.success("""
+                        **Principio Fundamental:**
+
+                        En Vigenère, si el texto plano tiene una repetición y esa repetición
+                        se cifra con las MISMAS letras de clave, el criptograma también
+                        tendrá una repetición. La distancia entre estas repeticiones siempre
+                        será un MÚLTIPLO de la longitud de clave.
+
+                        **Ejemplo:**
+                        - Clave: KEYKEY... (longitud 3)
+                        - Si "THE" aparece en posición 0 y 21 del texto original
+                        - La repetición en el criptograma estará a distancia 21
+                        - 21 es múltiplo de 3 (21 = 3 × 7)
+                        """)
+
+                        st.markdown("### Limitaciones y Consideraciones")
+                        st.warning("""
+                        - **Requiere texto largo:** Más texto = más repeticiones = más exactitud
+                        - **Falsos positivos:** Coincidencias casuales pueden dar distancias incorrectas
+                        - **Múltiples divisores:** Pueden haber varias posibles longitudes
+                        - **Preferencia:** Probar primero números PRIMOS (menos divisores)
                         """)
 
                 except Exception as e:
@@ -557,10 +758,14 @@ elif opcion == "4️⃣ Generar alfabeto mixto 🔤":
 
 # ======================== 5️⃣ CRIPTOANÁLISIS ========================
 elif opcion == "5️⃣ Criptoanálisis (resolver a y b) 🔍":
-    st.header("🔍 Criptoanálisis por Ecuaciones")
-    st.markdown("Ataque al Cifrado Afín mediante dos correspondencias conocidas: C₁=aM₁+b y C₂=aM₂+b")
+    st.header("🔍 Criptoanálisis del Cifrado Afín por Ecuaciones")
+    st.markdown("""
+    Ataque matemático al Cifrado Afín utilizando dos correspondencias conocidas de plaintext-ciphertext.
+    Si se conocen dos pares (M₁,C₁) y (M₂,C₂), es posible resolver el sistema de ecuaciones para
+    encontrar los parámetros secretos **a** (multiplicador) y **b** (desplazamiento).
+    """)
 
-    st.info("💡 Seleccione un alfabeto e ingrese dos pares (letra) y el sistema resolverá para hallar `a` y `b`")
+    st.info("💡 Seleccione un alfabeto e ingrese dos pares conocidos. El sistema resolverá automáticamente para hallar **a** y **b**")
 
     col1, col2 = st.columns(2)
 
@@ -629,18 +834,151 @@ elif opcion == "5️⃣ Criptoanálisis (resolver a y b) 🔍":
                                 st.write(f"C₂ = ({a} × {M2} + {b}) mod {n} = {C2_calc} ✓" if C2_calc == C2 else f"Error: {C2_calc} ≠ {C2}")
 
                         with tab2:
+                            st.markdown("## 📐 Explicación Conceptual")
+
+                            st.markdown("""
+                            ### El Problema a Resolver
+                            Dado un criptograma de cifrado afín, se tiene:
+                            - **Dos pares conocidos:** (M₁, C₁) y (M₂, C₂)
+                            - **Dos incógnitas:** a (multiplicador) y b (desplazamiento)
+                            - **Objetivo:** Encontrar los valores secretos de a y b
+                            """)
+                            st.info("💡 Esto es un ataque de **texto plano conocido** (Known Plaintext Attack)")
+
+                            st.markdown("### Fórmula del Cifrado Afín (LaTeX)")
+                            st.latex(r"C_i = (a \cdot M_i + b) \bmod n")
+                            st.markdown("""
+                            Donde:
+                            - C_i: Letra cifrada en posición i
+                            - M_i: Letra original en posición i
+                            - a: Multiplicador (debe cumplir gcd(a,n) = 1)
+                            - b: Desplazamiento aditivo
+                            - n: Tamaño del alfabeto (módulo)
+                            """)
+
+                            st.markdown("### Secuencia de 4 Pasos - Resolver el Sistema")
+
+                            col_paso1, col_paso2 = st.columns(2)
+
+                            with col_paso1:
+                                st.markdown("**Paso 1: Calcular Diferencias**")
+                                st.markdown("""
+                                ΔC = C₁ - C₂ (mod n)
+                                ΔM = M₁ - M₂ (mod n)
+
+                                Estas diferencias crean una nueva ecuación
+                                sin la variable b.
+                                """)
+
+                            with col_paso2:
+                                st.markdown("**Paso 2: Encontrar Inverso Modular**")
+                                st.markdown("""
+                                Calcular (ΔM)⁻¹ mod n
+
+                                Este es el número que cumple:
+                                (ΔM) × (ΔM)⁻¹ ≡ 1 (mod n)
+                                """)
+
+                            col_paso3, col_paso4 = st.columns(2)
+
+                            with col_paso3:
+                                st.markdown("**Paso 3: Resolver para 'a'**")
+                                st.latex(r"a \equiv \Delta C \times (\Delta M)^{-1} \pmod{n}")
+                                st.markdown("""
+                                El multiplicador se obtiene
+                                de la proporción entre diferencias.
+                                """)
+
+                            with col_paso4:
+                                st.markdown("**Paso 4: Resolver para 'b'**")
+                                st.latex(r"b \equiv C_1 - a \times M_1 \pmod{n}")
+                                st.markdown("""
+                                Una vez conocido 'a', se calcula 'b'
+                                usando cualquiera de los pares.
+                                """)
+
+                            st.divider()
+
+                            st.markdown("### Solución Encontrada - Detalles")
+
+                            col_sol1, col_sol2 = st.columns(2)
+
+                            with col_sol1:
+                                st.markdown("**Parámetros Criptográficos:**")
+                                st.markdown(f"""
+                                - **a = {a}** (multiplicador)
+                                - **b = {b}** (desplazamiento)
+                                - **n = {n}** (módulo)
+                                - **gcd(a, n) = 1** ✓ (válido)
+                                """)
+
+                            with col_sol2:
+                                st.markdown("**Ecuación General:**")
+                                st.latex(f"C = ({a} \\cdot M + {b}) \\bmod {n}")
+
+                            st.markdown("### Cálculos Realizados (Paso a Paso)")
+
+                            delta_c = (C1 - C2) % n
+                            delta_m = (M1 - M2) % n
+
                             st.markdown(f"""
-                            **Parámetros encontrados:**
-                            - a = {a} (multiplicador)
-                            - b = {b} (desplazamiento)
-                            - n = {n} (módulo)
+                            **Paso 1 - Diferencias:**
+                            - ΔC = C₁ - C₂ = {C1} - {C2} = **{delta_c}** (mod {n})
+                            - ΔM = M₁ - M₂ = {M1} - {M2} = **{delta_m}** (mod {n})
 
-                            **Fórmula:** C = ({a}M + {b}) mod {n}
+                            **Paso 2 - Inverso Modular:**
+                            - Se busca (ΔM)⁻¹ tal que: {delta_m} × (ΔM)⁻¹ ≡ 1 (mod {n})
+                            """)
 
-                            **Sistema resuelto:**
-                            1. ΔC = {(C1-C2)%n}, ΔM = {(M1-M2)%n}
-                            2. a ≡ ΔC × (ΔM)⁻¹ (mod {n})
-                            3. b ≡ C₁ - a×M₁ (mod {n})
+                            st.markdown(f"""
+                            **Paso 3 - Cálculo de 'a':**
+                            - a ≡ ΔC × (ΔM)⁻¹ (mod {n})
+                            - a ≡ {delta_c} × inverso (mod {n})
+                            - **a = {a}** ✓
+
+                            **Paso 4 - Cálculo de 'b':**
+                            - b ≡ C₁ - a × M₁ (mod {n})
+                            - b ≡ {C1} - {a} × {M1} (mod {n})
+                            - b ≡ {C1} - {(a * M1) % n} (mod {n})
+                            - **b = {b}** ✓
+                            """)
+
+                            st.markdown("### Por Qué Funciona Este Ataque")
+
+                            st.success("""
+                            **Principio Matemático:**
+
+                            El cifrado afín es un sistema de ecuaciones lineales:
+                            - C₁ = aM₁ + b (mod n)
+                            - C₂ = aM₂ + b (mod n)
+
+                            Con 2 ecuaciones y 2 incógnitas, el sistema es SIEMPRE RESOLUBLE
+                            si gcd(M₁ - M₂, n) = 1.
+
+                            Por eso es vulnerable a ataques de texto plano conocido:
+                            si se conocen 2 pares plaintext-ciphertext, se rompe completamente.
+                            """)
+
+                            st.markdown("### Limitaciones y Consideraciones")
+
+                            st.warning("""
+                            ⚠️ **Debilidades del Cifrado Afín:**
+
+                            1. **Vulnerable a KPA (Known Plaintext Attack):**
+                               - Solo se necesitan 2 pares plaintext-ciphertext
+                               - En idioma natural, esto es frecuente
+
+                            2. **Espacio de claves pequeño:**
+                               - Para alfabeto de 26 letras: solo φ(26) × 26 = 312 claves válidas
+                               - Se puede romper por fuerza bruta fácilmente
+
+                            3. **Vulnerable a análisis de frecuencias:**
+                               - Es monoalfabético, preserva patrones
+                               - Las letras más frecuentes siguen siendo frecuentes
+
+                            4. **No proporciona confidencialidad moderna:**
+                               - NO usar en aplicaciones reales de seguridad
+                               - Solo para fines educativos
                             """)
                     else:
                         st.error(f"❌ {resultado.get('mensaje', 'Error desconocido')}")
@@ -651,8 +989,11 @@ elif opcion == "5️⃣ Criptoanálisis (resolver a y b) 🔍":
 
 # ======================== 6️⃣ COMPARADOR ========================
 elif opcion == "6️⃣ Comparar César vs Afín 📊":
-    st.header("📊 Comparador de Cifras Clásicas")
-    st.markdown("Cifra el mismo mensaje con César y Afín para observar cómo cambia la distribución.")
+    st.header("📊 Comparador de Cifras Clásicas (César vs Afín)")
+    st.markdown("""
+    Compara dos métodos de cifrado clásico monoalfabético: César (simple) y Afín (más complejo).
+    Observa cómo cambian las características criptográficas y la resistencia ante ataques.
+    """)
 
     col1, col2 = st.columns(2)
 
@@ -731,14 +1072,201 @@ elif opcion == "6️⃣ Comparar César vs Afín 📊":
                             st.bar_chart(freq_afin)
 
                     with tab4:
-                        st.markdown("""
-                        **Análisis:**
-                        Ambos son monoalfabéticos: preservan frecuencias.
+                        st.markdown("## 📊 Análisis Detallado de Ambos Métodos")
 
-                        - Afín es más seguro que César, pero aún débil
-                        - La distribución de frecuencias no cambia
-                        - Vulnerables a análisis de frecuencias
-                        - El Índice de Coincidencia debe ser similar en ambos
+                        st.markdown("### 1. Fórmula Matemática - Cifrado de César")
+                        st.latex(r"C_i = (M_i + k) \bmod n")
+                        st.markdown("""
+                        Donde:
+                        - C_i: Letra cifrada
+                        - M_i: Letra original
+                        - k: Desplazamiento (clave)
+                        - n: Tamaño del alfabeto
+                        """)
+
+                        st.markdown("### 2. Fórmula Matemática - Cifrado Afín")
+                        st.latex(r"C_i = (a \cdot M_i + b) \bmod n")
+                        st.markdown("""
+                        Donde:
+                        - C_i: Letra cifrada
+                        - M_i: Letra original
+                        - a: Multiplicador (debe cumplir gcd(a,n) = 1)
+                        - b: Desplazamiento
+                        - n: Tamaño del alfabeto
+                        """)
+
+                        st.divider()
+
+                        st.markdown("### 3. Características de Ambos Métodos")
+
+                        col_carac1, col_carac2 = st.columns(2)
+
+                        with col_carac1:
+                            st.markdown("**Cifrado de César (k={}):**".format(k))
+                            st.markdown(f"""
+                            - **Tipo:** Monoalfabético simple
+                            - **Claves posibles:** {len(alfabeto)} (muy débil)
+                            - **Parámetros:** Solo 1 (k)
+                            - **Proceso:** Desplazamiento puro
+                            - **Vulnerabilidad:** Análisis de frecuencias
+                            - **Fuerza bruta:** {len(alfabeto)} intentos
+                            """)
+
+                        with col_carac2:
+                            st.markdown("**Cifrado Afín (a={}, b={}):**".format(a, b))
+                            st.markdown(f"""
+                            - **Tipo:** Monoalfabético general
+                            - **Claves posibles:** ~312 (26 letras)
+                            - **Parámetros:** Dos (a, b)
+                            - **Proceso:** Transformación lineal
+                            - **Vulnerabilidad:** Análisis de frecuencias
+                            - **Fuerza bruta:** 312 intentos
+                            """)
+
+                        st.divider()
+
+                        st.markdown("### 4. Comparativa de Propiedades Criptográficas")
+
+                        comparativa_data = {
+                            "Característica": [
+                                "Tipo de cifrado",
+                                "Número de claves",
+                                "Análisis frecuencias",
+                                "IC (Índice Coincidencia)",
+                                "Patrón preservado",
+                                "Seguridad actual",
+                                "Vulnerabilidad principal",
+                                "Ataque más rápido"
+                            ],
+                            "César": [
+                                "Substitución simple",
+                                f"{len(alfabeto)} (muy pocas)",
+                                "Sí, se mantiene igual",
+                                "Igual al original",
+                                "Todos los patrones",
+                                "Muy débil (histórico)",
+                                "Fuerza bruta: 26 pasos",
+                                "Fuerza bruta"
+                            ],
+                            "Afín": [
+                                "Substitución lineal",
+                                "~312 (aún pocas)",
+                                "Sí, se mantiene igual",
+                                "Igual al original",
+                                "Todos los patrones",
+                                "Muy débil (histórico)",
+                                "Fuerza bruta: 312 pasos",
+                                "Fuerza bruta o KPA"
+                            ]
+                        }
+
+                        df_comparativa = st.dataframe(comparativa_data)
+
+                        st.divider()
+
+                        st.markdown("### 5. Secuencia de Cifrado - Paso a Paso")
+
+                        col_seq1, col_seq2 = st.columns(2)
+
+                        with col_seq1:
+                            st.markdown("**César:**")
+                            st.markdown(f"""
+                            1. Tomar letra original: M
+                            2. Obtener valor: pos = índice(M)
+                            3. Sumar desplazamiento: pos + {k}
+                            4. Aplicar módulo: (pos + {k}) mod {len(alfabeto)}
+                            5. Convertir a letra: C = alfabeto[resultado]
+
+                            **Ejemplo:** H → (7 + {k}) mod 26 = {(7 + k) % len(alfabeto)} → alfabeto[{(7 + k) % len(alfabeto)}]
+                            """)
+
+                        with col_seq2:
+                            st.markdown("**Afín:**")
+                            st.markdown(f"""
+                            1. Tomar letra original: M
+                            2. Obtener valor: pos = índice(M)
+                            3. Multiplicar: {a} × pos
+                            4. Sumar desplazamiento: ({a} × pos) + {b}
+                            5. Aplicar módulo: ({a} × pos + {b}) mod {len(alfabeto)}
+                            6. Convertir a letra: C = alfabeto[resultado]
+
+                            **Ejemplo:** H → ({a} × 7 + {b}) mod 26 = {(a * 7 + b) % len(alfabeto)} → alfabeto[{(a * 7 + b) % len(alfabeto)}]
+                            """)
+
+                        st.divider()
+
+                        st.markdown("### 6. Por Qué Se Preserva el IC (Índice de Coincidencia)")
+
+                        st.info("""
+                        **Propiedad de Biyección:**
+
+                        Tanto César como Afín son transformaciones BIYECTIVAS (1:1).
+                        Esto significa:
+                        - Cada letra original → exactamente una letra cifrada
+                        - Cada letra cifrada ← exactamente una letra original
+
+                        Por lo tanto:
+                        - La frecuencia relativa de cada letra se preserva
+                        - Si E aparecía 12 veces en el original
+                        - Su cifrada (por ejemplo X) aparecerá 12 veces en el criptograma
+
+                        El IC (Índice de Coincidencia) depende SOLO de las frecuencias,
+                        no de la transformación. Por eso es IGUAL en ambos casos.
+                        """)
+
+                        st.divider()
+
+                        st.markdown("### 7. Vulnerabilidades - Análisis de Frecuencias")
+
+                        col_vuln1, col_vuln2 = st.columns(2)
+
+                        with col_vuln1:
+                            st.markdown("**Cómo se rompe César:**")
+                            st.markdown("""
+                            1. Calcular frecuencias del criptograma
+                            2. Asumir que la más frecuente es E
+                            3. Calcular desplazamiento: k = pos(cif_E) - pos(E)
+                            4. Probar con fuerza bruta los 26 valores
+                            5. Seleccionar el que genera texto sensato
+
+                            **Tiempo:** Milisegundos
+                            """)
+
+                        with col_vuln2:
+                            st.markdown("**Cómo se rompe Afín:**")
+                            st.markdown("""
+                            1. Opción A - Fuerza bruta: Probar 312 pares (a,b)
+                            2. Opción B - Análisis avanzado:
+                               - Identificar las 2 letras más frecuentes
+                               - Asumir qué letras del original son
+                               - Resolver sistema de ecuaciones
+                               - Obtener a y b directamente
+                            3. Verificar resultado
+
+                            **Tiempo:** Segundos a milisegundos
+                            """)
+
+                        st.divider()
+
+                        st.success("""
+                        ### ✅ Conclusión
+
+                        **Similitudes:**
+                        - Ambos son monoalfabéticos
+                        - Ambos preservan IC y frecuencias
+                        - Ambos vulnerables a análisis de frecuencias
+                        - Ambos débiles ante ataques modernos
+
+                        **Diferencias:**
+                        - Afín tiene 12× más claves posibles (~312 vs 26)
+                        - Afín requiere verificar gcd(a,n) = 1
+                        - Afín es más complejo pero NO más seguro en práctica
+
+                        **Lección de Seguridad:**
+                        Aumentar la complejidad matemática no garantiza seguridad.
+                        El verdadero problema es que ambos son monoalfabéticos.
+                        La solución es usar cifrados POLIALFABÉTICOS (como Vigenère)
+                        o métodos modernos (como AES).
                         """)
 
                 except Exception as e:
