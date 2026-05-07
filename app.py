@@ -48,13 +48,23 @@ if opcion == "🏠 Inicio":
     with col1:
         st.subheader("📚 Módulos Disponibles")
         st.markdown("""
-        1. **🔐 Vigenère** - Cifrador polialfabético con análisis detallado
-        2. **🔎 Kasiski** - Detecta la longitud probable de clave
-        3. **🔓 Romper Vigenère** - Descifra automáticamente con Chi-Squared
-        4. **🔤 Alfabeto Mixto** - Generador de alfabetos personalizados
-        5. **🔍 Criptoanálisis** - Ataque por ecuaciones simultáneas
-        6. **📊 Comparador** - Análisis César vs Afín
-        7. **✔ Validador** - Verifica parámetros criptográficos
+1️⃣ **Calcular MCD** - Máximo Común Divisor (Algoritmo de Euclides)
+
+2️⃣ **Verificar si son coprimos** - Validar números coprimos
+
+3️⃣ **Validar constante (cripto)** - Verifica parámetros criptográficos
+
+4️⃣ **Generar alfabeto mixto** 🔤 - Generador de alfabetos personalizados
+
+5️⃣ **Criptoanálisis (resolver a y b)** 🔍 - Ataque por ecuaciones simultáneas
+
+6️⃣ **Comparar César vs Afín** 📊 - Análisis comparativo de cifrados
+
+7️⃣ **Vigenère (polialfabético)** 🔐 - Cifrador polialfabético con análisis detallado
+
+8️⃣ **Método de Kasiski** 🔎 - Detecta la longitud probable de clave
+
+9️⃣ **Romper Vigenère** - Descifra automáticamente con Chi-Squared
         """)
 
     with col2:
@@ -72,19 +82,19 @@ if opcion == "🏠 Inicio":
     st.subheader("💡 ¿Por dónde empezar?")
     st.info("""
     **Para principiantes:**
-    1. Comienza con el **Comparador** para entender César vs Afín
-    2. Explora **Vigenère** para cifrar/descifrar
-    3. Usa **Kasiski** para encontrar la longitud de clave
+    1. Comienza con 6️⃣ **Comparador** para entender César vs Afín
+    2. Explora 7️⃣ **Vigenère** para cifrar/descifrar
+    3. Usa 8️⃣ **Kasiski** para encontrar la longitud de clave
 
     **Para ataques criptoanalíticos:**
-    1. **Kasiski** → Encuentra longitud de clave
-    2. **Romper Vigenère** → Encuentra la clave exacta
-    3. **Verifica** que el descifrado tenga sentido
+    1. 8️⃣ **Kasiski** → Encuentra longitud de clave
+    2. 9️⃣ **Romper Vigenère** → Encuentra la clave exacta
+    3. Verifica que el descifrado tenga sentido
 
     **Para avanzados:**
-    1. Intenta **Criptoanálisis** con ecuaciones
-    2. Experimenta con **Alfabetos Mixtos**
-    3. Valida constantes con el **Validador**
+    1. Intenta 5️⃣ **Criptoanálisis** con ecuaciones
+    2. Experimenta con 4️⃣ **Alfabetos Mixtos**
+    3. Valida constantes con 3️⃣ el **Validador**
     """)
 
 # ======================== 1️⃣ CALCULAR MCD ========================
@@ -211,12 +221,60 @@ elif opcion == "8️⃣ Método de Kasiski 🔎":
 
                     st.success("✔ Análisis completado")
 
-                    tab1, tab2, tab3 = st.tabs(["Resultados", "Detalles", "Información"])
+                    tab1, tab2, tab3, tab4 = st.tabs(["Resultados", "Pasos Detallados", "Detalles Técnicos", "Información"])
 
                     with tab1:
                         st.write(kasiski_lib.resumen_kasiski(criptograma, n))
 
                     with tab2:
+                        st.subheader("📋 Proceso Paso a Paso")
+
+                        st.markdown("### Paso 1️⃣: Limpieza del Texto")
+                        col_clean1, col_clean2 = st.columns(2)
+                        with col_clean1:
+                            st.write("**Texto Original:**")
+                            st.code(resultado["texto_original"][:200] + ("..." if len(resultado["texto_original"]) > 200 else ""), language=None)
+                        with col_clean2:
+                            st.write("**Texto Limpio:**")
+                            st.code(resultado["texto_limpio"][:200] + ("..." if len(resultado["texto_limpio"]) > 200 else ""), language=None)
+                        st.info(f"✔ Longitud original: {len(resultado['texto_original'])} caracteres → Longitud limpia: {len(resultado['texto_limpio'])} caracteres")
+
+                        st.markdown("### Paso 2️⃣: Búsqueda de Repeticiones")
+                        if resultado["repeticiones"]:
+                            st.write(f"**Se encontraron {len(resultado['repeticiones'])} patrones diferentes repetidos:**")
+                            for patron, posiciones in list(resultado["repeticiones"].items())[:15]:
+                                st.write(f"- `{patron}` aparece en {len(posiciones)} ocasiones")
+                                st.caption(f"  Posiciones: {posiciones}")
+                            if len(resultado["repeticiones"]) > 15:
+                                st.info(f"... y {len(resultado['repeticiones']) - 15} patrones más")
+                        else:
+                            st.warning("⚠️ No se encontraron repeticiones")
+
+                        st.markdown("### Paso 3️⃣: Cálculo de Distancias")
+                        if resultado["distancias"]:
+                            st.write(f"**Total de distancias calculadas: {len(resultado['distancias'])}**")
+                            st.write("Primeras 20 distancias:")
+                            st.code(str(resultado["distancias"][:20]), language=None)
+                            if len(resultado["distancias"]) > 20:
+                                st.caption(f"... {len(resultado['distancias']) - 20} distancias más")
+                        else:
+                            st.warning("⚠️ No se calcularon distancias")
+
+                        st.markdown("### Paso 4️⃣: Cálculo del MCD")
+                        if resultado["mcd"]:
+                            st.metric("MCD (Máximo Común Divisor)", resultado["mcd"])
+                            st.info(f"El MCD estimado es **{resultado['mcd']}** - Este es el candidato más probable para la longitud de la clave")
+                        else:
+                            st.warning("⚠️ No se pudo calcular el MCD")
+
+                        st.markdown("### Paso 5️⃣: Posibles Longitudes de Clave")
+                        if resultado["posibles_claves"]:
+                            st.success(f"**Longitudes de clave probables: {resultado['posibles_claves']}**")
+                            st.write(f"Estos son los divisores del MCD {resultado['mcd']} (excepto 1)")
+                        else:
+                            st.warning("⚠️ No se encontraron posibles longitudes")
+
+                    with tab3:
                         col_a, col_b = st.columns(2)
 
                         with col_a:
@@ -234,7 +292,7 @@ elif opcion == "8️⃣ Método de Kasiski 🔎":
                         for patron, posiciones in list(resultado["repeticiones"].items())[:10]:
                             st.write(f"- `{patron}` en posiciones: {posiciones}")
 
-                    with tab3:
+                    with tab4:
                         st.markdown("""
                         **¿Cómo funciona Kasiski?**
                         1. Busca patrones repetidos de n caracteres
@@ -273,7 +331,7 @@ elif opcion == "9️⃣ Romper Vigenère":
 
                     st.success("✔ Descifrado completado")
 
-                    tab1, tab2, tab3 = st.tabs(["Resultado", "Análisis Detallado", "Información"])
+                    tab1, tab2, tab3, tab4 = st.tabs(["Resultado", "Pasos Detallados", "Análisis Técnico", "Información"])
 
                     with tab1:
                         col_res1, col_res2 = st.columns(2)
@@ -284,10 +342,61 @@ elif opcion == "9️⃣ Romper Vigenère":
                             st.write("**Score (Chi²):**")
                             st.metric("Chi² Score", f"{resultado['chi2_score']:.2f}")
 
-                        st.write("**Texto descifrado:**")
-                        st.code(resultado["descifrado"], language=None)
+                        st.write("**Texto descifrado (primeros 300 caracteres):**")
+                        st.code(resultado["descifrado"][:300] + ("..." if len(resultado["descifrado"]) > 300 else ""), language=None)
+
+                        with st.expander("📖 Ver texto descifrado completo"):
+                            st.code(resultado["descifrado"], language=None)
 
                     with tab2:
+                        st.subheader("📋 Proceso Paso a Paso")
+
+                        st.markdown("### Paso 1️⃣: Limpieza del Texto")
+                        st.info(f"✔ Texto limpio (sin espacios ni caracteres especiales)")
+                        st.caption(f"Longitud original: {len(criptograma)} → Longitud limpia: {len(resultado['criptograma_limpio'])} caracteres")
+                        st.code(resultado['criptograma_limpio'][:150] + ("..." if len(resultado['criptograma_limpio']) > 150 else ""), language=None)
+
+                        st.markdown("### Paso 2️⃣: División en Columnas")
+                        st.info(f"✔ Criptograma dividido en {resultado['longitud_clave']} columnas")
+                        st.caption(f"Cada columna fue cifrada con una letra diferente de la clave")
+
+                        col_div1, col_div2 = st.columns(2)
+                        with col_div1:
+                            st.write(f"**Número de columnas:** {len(resultado['columnas'])}")
+                            for i, col in enumerate(resultado['columnas'][:3]):
+                                st.write(f"- Columna {i}: {len(col)} caracteres")
+                        with col_div2:
+                            st.write(f"**Primeros caracteres de cada columna:**")
+                            for i, col in enumerate(resultado['columnas']):
+                                st.code(col[:15] + ("..." if len(col) > 15 else ""), language=None)
+
+                        st.markdown("### Paso 3️⃣: Análisis de Cada Columna (Chi-Squared Test)")
+                        st.info(f"✔ Para cada columna se probaron 26 desplazamientos posibles")
+
+                        for analisis in resultado['analisis_columnas']:
+                            col_analisis1, col_analisis2, col_analisis3, col_analisis4 = st.columns(4)
+
+                            with col_analisis1:
+                                st.metric(f"Columna {analisis['numero']}", f"{analisis['longitud']} car.")
+                            with col_analisis2:
+                                st.metric("Desplazamiento", analisis['desplazamiento'])
+                            with col_analisis3:
+                                st.metric("Letra Clave", analisis['letra_clave'])
+                            with col_analisis4:
+                                st.metric("Chi² Score", f"{analisis['chi2']:.2f}")
+
+                            st.caption(f"Muestra: {analisis['muestra']}")
+
+                        st.markdown("### Paso 4️⃣: Reconstrucción de la Clave")
+                        st.success(f"**Clave encontrada: {resultado['clave']}**")
+                        st.write(f"Chi² Total (suma de todos): **{resultado['chi2_score']:.2f}**")
+                        st.caption("Menor valor = mejor ajuste a frecuencias de inglés")
+
+                        st.markdown("### Paso 5️⃣: Descifrado Final")
+                        st.info(f"✔ Criptograma descifrado usando la clave encontrada")
+                        st.code(resultado['descifrado'][:200] + ("..." if len(resultado['descifrado']) > 200 else ""), language=None)
+
+                    with tab3:
                         st.write("**Método:** Chi-Squared Test")
                         st.write("**¿Cómo funciona?**")
                         st.markdown("""
@@ -305,7 +414,7 @@ elif opcion == "9️⃣ Romper Vigenère":
 
                         st.info("💡 **Flujo recomendado:**\n1. Use Kasiski para encontrar la longitud\n2. Use esta herramienta para encontrar la clave\n3. Verifique que el descifrado tenga sentido")
 
-                    with tab3:
+                    with tab4:
                         st.markdown("""
                         **¿Cuándo usar esta herramienta?**
                         - Cuando ya conoces la longitud de la clave (por Kasiski)

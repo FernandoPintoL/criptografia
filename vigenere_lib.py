@@ -1,6 +1,7 @@
 def limpiar_texto(texto):
-    return "".join(c for c in texto.upper() if c.isalpha())
+    return "".join(c for c in texto.upper() if c.isalpha()) 
 
+# igual la clave con el texto, repitiendo la clave hasta alcanzar la longitud del texto
 def generar_clave(texto, clave):
     texto = limpiar_texto(texto)
     clave = limpiar_texto(clave)
@@ -19,12 +20,12 @@ def cifrar_vigenere(texto, clave, n=26):
 
     resultado = []
     for i in range(len(texto)):
-        m = ord(texto[i]) - 65
-        k = ord(clave_ext[i]) - 65
-        c = (m + k) % n
-        resultado.append(chr(c + 65))
+        m = ord(texto[i]) - 65 # Convertir letra a número (A=0, B=1, ..., Z=25)
+        k = ord(clave_ext[i]) - 65 # Convertir letra de la clave a número
+        c = (m + k) % n # Cifrado: (M + K) mod n
+        resultado.append(chr(c + 65)) # Convertir número de vuelta a letra
 
-    return "".join(resultado)
+    return "".join(resultado) 
 
 def descifrar_vigenere(texto, clave, n=26):
     texto = limpiar_texto(texto)
@@ -35,10 +36,10 @@ def descifrar_vigenere(texto, clave, n=26):
 
     resultado = []
     for i in range(len(texto)):
-        c = ord(texto[i]) - 65
-        k = ord(clave_ext[i]) - 65
-        m = (c - k) % n
-        resultado.append(chr(m + 65))
+        c = ord(texto[i]) - 65 # Convertir letra cifrada a número
+        k = ord(clave_ext[i]) - 65 # Convertir letra de la clave a número
+        m = (c - k) % n # Descifrado: (C - K) mod n
+        resultado.append(chr(m + 65)) # Convertir número de vuelta a letra
 
     return "".join(resultado)
 
@@ -90,7 +91,7 @@ def mostrar_proceso_detallado(texto, clave):
 
 def analisis_polialfabetico(texto, clave):
     texto = limpiar_texto(texto)
-    clave_ext = generar_clave(texto, clave)
+    clave_ext = generar_clave(texto, clave) 
     cifrado = cifrar_vigenere(texto, clave)
 
     mapa = {}

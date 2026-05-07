@@ -44,11 +44,14 @@ def calcular_mcd_lista(lista):
 
 def kasiski(texto, n=3):
 
+    texto_original = texto
     texto = limpiar_texto(texto)
 
     if len(texto) < n:
         return {
             "mensaje": "❌ Texto demasiado corto para análisis",
+            "texto_original": texto_original,
+            "texto_limpio": texto,
             "repeticiones": {},
             "distancias": [],
             "mcd": None,
@@ -61,6 +64,8 @@ def kasiski(texto, n=3):
     if not distancias:
         return {
             "mensaje": "❌ No se encontraron repeticiones útiles",
+            "texto_original": texto_original,
+            "texto_limpio": texto,
             "repeticiones": repeticiones,
             "distancias": [],
             "mcd": None,
@@ -78,6 +83,7 @@ def kasiski(texto, n=3):
 
     return {
         "mensaje": "✔ Análisis Kasiski completado",
+        "texto_original": texto_original,
         "texto_limpio": texto,
         "repeticiones": repeticiones,
         "distancias": distancias,
