@@ -444,45 +444,49 @@ elif opcion == "5️⃣ Criptoanálisis (resolver a y b) 🔍":
                 C2 = alfabeto.index(C2_letra)
 
             if st.button("🔍 Resolver", key="btn_crypto"):
-                resultado = resolver_afin(M1, C1, M2, C2, n)
+                try:
+                    resultado = resolver_afin(M1, C1, M2, C2, n)
 
-                if resultado["exito"]:
-                    st.success("✔ Sistema resuelto")
+                    if resultado.get("exito", False):
+                        st.success("✔ Sistema resuelto")
 
-                    a = resultado["a"]
-                    b = resultado["b"]
+                        a = resultado["a"]
+                        b = resultado["b"]
 
-                    st.divider()
+                        st.divider()
 
-                    tab1, tab2 = st.tabs(["Verificación", "Información"])
+                        tab1, tab2 = st.tabs(["Verificación", "Información"])
 
-                    with tab1:
-                        st.write("**Verificación de la solución:**")
-                        col_v1, col_v2 = st.columns(2)
+                        with tab1:
+                            st.write("**Verificación de la solución:**")
+                            col_v1, col_v2 = st.columns(2)
 
-                        with col_v1:
-                            C1_calc = (a * M1 + b) % n
-                            C2_calc = (a * M2 + b) % n
-                            st.write(f"C₁ = ({a} × {M1} + {b}) mod {n} = {C1_calc} ✓" if C1_calc == C1 else f"Error: {C1_calc} ≠ {C1}")
-                            st.write(f"C₂ = ({a} × {M2} + {b}) mod {n} = {C2_calc} ✓" if C2_calc == C2 else f"Error: {C2_calc} ≠ {C2}")
+                            with col_v1:
+                                C1_calc = (a * M1 + b) % n
+                                C2_calc = (a * M2 + b) % n
+                                st.write(f"C₁ = ({a} × {M1} + {b}) mod {n} = {C1_calc} ✓" if C1_calc == C1 else f"Error: {C1_calc} ≠ {C1}")
+                                st.write(f"C₂ = ({a} × {M2} + {b}) mod {n} = {C2_calc} ✓" if C2_calc == C2 else f"Error: {C2_calc} ≠ {C2}")
 
-                    with tab2:
-                        st.markdown(f"""
-                        **Parámetros encontrados:**
-                        - a = {a} (multiplicador)
-                        - b = {b} (desplazamiento)
-                        - n = {n} (módulo)
+                        with tab2:
+                            st.markdown(f"""
+                            **Parámetros encontrados:**
+                            - a = {a} (multiplicador)
+                            - b = {b} (desplazamiento)
+                            - n = {n} (módulo)
 
-                        **Fórmula:** C = ({a}M + {b}) mod {n}
+                            **Fórmula:** C = ({a}M + {b}) mod {n}
 
-                        **Sistema resuelto:**
-                        1. ΔC = {(C1-C2)%n}, ΔM = {(M1-M2)%n}
-                        2. a ≡ ΔC × (ΔM)⁻¹ (mod {n})
-                        3. b ≡ C₁ - a×M₁ (mod {n})
-                        """)
-                else:
-                    st.error(f"❌ {resultado['mensaje']}")
-                    st.warning("⚠️ No se pudo resolver el sistema. Verifique que las correspondencias sean válidas.")
+                            **Sistema resuelto:**
+                            1. ΔC = {(C1-C2)%n}, ΔM = {(M1-M2)%n}
+                            2. a ≡ ΔC × (ΔM)⁻¹ (mod {n})
+                            3. b ≡ C₁ - a×M₁ (mod {n})
+                            """)
+                    else:
+                        st.error(f"❌ {resultado.get('mensaje', 'Error desconocido')}")
+                        st.warning("⚠️ No se pudo resolver el sistema. Verifique que las correspondencias sean válidas.")
+                except Exception as e:
+                    st.error(f"❌ Error al resolver: {str(e)}")
+                    st.warning("⚠️ Ocurrió un error inesperado. Verifique los datos ingresados.")
 
 # ======================== 6️⃣ COMPARADOR ========================
 elif opcion == "6️⃣ Comparar César vs Afín 📊":
