@@ -1,3 +1,11 @@
+import sys
+import os
+
+# Asegurar que el directorio actual está en el path de Python
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 import streamlit as st
 import gcd_lib
 import alfabeto_lib
